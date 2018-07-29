@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:TranslationNTT"
+             xmlns:dm="clr-namespace:dotMorten.Xamarin.Forms;assembly=dotMorten.Xamarin.Forms.AutoSuggestBox"
+             x:Class="TranslationNTT.Views.MainPage">
+    <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="20, 10">
+        <Label Text="Translator" FontSize="Large" FontAttributes="Bold" HorizontalOptions="FillAndExpand" HorizontalTextAlignment="Center"/>
+        <Label Text="{Binding SelectedLanguage}" Margin="0, 20, 0, 0" HorizontalOptions="FillAndExpand"/>
+        <dm:AutoSuggestBox PlaceholderText="Search" Text="{Binding SuggestionField, Mode=OneWayToSource}" x:Name="suggestionField"
+                BackgroundColor="{Binding SuggestionFieldColor}"
+                ItemsSource="{Binding MatchedWords}"
+                QuerySubmitted="AutoSuggestBox_QuerySubmitted"/>
+        <ListView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" ItemsSource="{Binding Words}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout HorizontalOptions="FillAndExpand">
+                            <Label Text="{Binding WordValue}" TextColor="Black"/>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+    
+
+</ContentPage>
