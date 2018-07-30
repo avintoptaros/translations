@@ -1,4 +1,5 @@
 ﻿using SQLite;
+using SQLiteNetExtensions.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using TranslationNTT.Data;
@@ -48,6 +49,23 @@ namespace TranslationNTT.Models.DatabaseControllers
             }
         }
 
+
+        public List<Language> GetAllWithChildren()
+        {
+            lock (locker)
+            {
+                if (database.Table<Language>().Count() == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    List<Language> languages = database.GetAllWithChildren<Language>();
+                    return languages;
+                }
+            }
+        }
+
         public Language GetById(int id)
         {
             lock (locker)
@@ -73,7 +91,8 @@ namespace TranslationNTT.Models.DatabaseControllers
                 }
                 else
                 {
-                    return database.Table<Language>().Where(language => language.Culture.Equals(culture)).FirstOrDefault();
+                    return database.GetAllWithChildren<Language>(l => l.Culture.Equals(culture)).FirstOrDefault();
+                    //return database.Table<Language>().Where(language => language.Culture.Equals(culture)).FirstOrDefault();
                 }
             }
         }
@@ -87,6 +106,18 @@ namespace TranslationNTT.Models.DatabaseControllers
                     return database.Update(language);
                 }
                 return database.Insert(language);
+            }
+        }
+
+        public void UpdateWithChildren(Language language, Word word)
+        {
+            lock (locker)
+            {
+                if (language.Id != 0)
+                {
+                    language.Words.Add(word);
+                    database.UpdateWithChildren(language);
+                }
             }
         }
 

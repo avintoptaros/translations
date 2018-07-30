@@ -17,6 +17,7 @@ namespace TranslationNTT.Models
         {
             LanguageDatabaseController.Instance.DeleteAll();
             WordDatabaseController.Instance.DeleteAll();
+            WordTranslateDatabaseController.Instance.DeleteAll();
 
             foreach (Record record in Records)
             {
@@ -50,25 +51,32 @@ namespace TranslationNTT.Models
                     language.Culture = record.Culture;
                     language.Name = cultureInfo.DisplayName;
                     LanguageDatabaseController.Instance.Save(language);
-                }                
+                }
 
                 // Save word
-                Word word = new Word();
-                word.LanguageId = language.Id;
-                word.WordValue = record.Word;
-
+                // check if word exists, if not, save it to database
+                Word word = WordDatabaseController.Instance.GetByValue(record.Word);
+                if (word == null)
+                {
+                    word = new Word();
+                    word.WordValue = record.Word;
+                    WordDatabaseController.Instance.Save(word);
+                    LanguageDatabaseController.Instance.UpdateWithChildren(language, word);
+                }
+                // if parent record is not null, then we have a translation
                 if (parentRecord != null)
                 {
-                    // it's a translation, so get the parent word
                     Word parentWord = WordDatabaseController.Instance.GetByValue(parentRecord.Word);
                     if (parentWord != null)
                     {
-                        word.WordId = parentWord.Id;
+                        WordTranslate wordTranslate = new WordTranslate();
+                        wordTranslate.WordId = word.Id;
+                        wordTranslate.ParentWordId = parentWord.Id;
+                        WordTranslateDatabaseController.Instance.Save(wordTranslate);
+
+                        WordDatabaseController.Instance.UpdateWithChildren(parentWord, word);
                     }
                 }
-
-                WordDatabaseController.Instance.Save(word);
-
                 return true;
             }
             catch (ArgumentNullException ex)

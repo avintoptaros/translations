@@ -2,13 +2,11 @@
 
 namespace TranslationNTT.Models
 {
-    class WordTranslate : DatabaseModel
+    public class WordTranslate : DatabaseModel
     {
-        [ForeignKey(typeof(Word), Name = "Id")]
+        [ForeignKey(typeof(Word))]
         public int WordId { get; set; }
-        [ForeignKey(typeof(Word), Name = "Id")]
+        [ForeignKey(typeof(Word))]
         public int ParentWordId { get; set; }
-
-
     }
 }

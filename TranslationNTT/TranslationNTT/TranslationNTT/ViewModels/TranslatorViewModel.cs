@@ -57,7 +57,7 @@ namespace TranslationNTT.ViewModels
                 _suggestionField = value;
                 if (_suggestionField != null)
                 {
-                    MatchedWords = new ObservableCollection<Word>(WordDatabaseController.Instance.GetByMatch(_suggestionField));
+                    //MatchedWords = new ObservableCollection<Word>(WordDatabaseController.Instance.GetByMatch(_suggestionField));
                 }
                 
                 OnPropertyChanged("SuggestionField");
