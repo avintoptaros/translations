@@ -34,6 +34,14 @@ namespace TranslationNTT.Models.DatabaseControllers
             _instance.database.CreateTable<Word>();
         }
 
+        public bool HasRecords()
+        {
+            lock (locker)
+            {
+                return database.Table<Word>().Count() > 0;
+            }
+        }
+
 
         public List<Word> GetAll()
         {
@@ -63,12 +71,7 @@ namespace TranslationNTT.Models.DatabaseControllers
         {
             lock (locker)
             {
-                if (database.Table<Word>().Count() == 0)
-                {
-                    return null;
-                } else {
-                    return database.Table<Word>().Where(word => translates.Any(t=>t.ParentWordId.Equals(word.Id))).ToList();
-                }
+                return database.Table<Word>().AsEnumerable().Where(word => translates.Any(t => t.WordId == word.Id)).ToList();
             }
         }
 
@@ -82,8 +85,17 @@ namespace TranslationNTT.Models.DatabaseControllers
                 }
                 else
                 {
-                    return database.GetAllWithChildren<Word>(word => word.WordValue.Equals(wordValue)).FirstOrDefault();
-                    //return database.Table<Word>().Where(word => word.WordValue.Equals(wordValue)).FirstOrDefault();
+                    Word word = database.Table<Word>().FirstOrDefault(w => w.WordValue.Equals(wordValue));
+                    if (word == null)
+                    {
+                        return null;
+                    }
+                    List<WordTranslate> translates = WordTranslateDatabaseController.Instance.GetAll(word.Id);
+                    if (translates != null)
+                    {
+                        word.Words = GetByTranslates(translates);
+                    }
+                    return word;
                 }
             }
         }
@@ -98,8 +110,9 @@ namespace TranslationNTT.Models.DatabaseControllers
                 }
                 else
                 {
-                    //return database.Table<Word>().Where(word => word.WordValue.ToLower().Contains(searchValue.ToLower()) && word.WordId == 0).ToList();
-                    return database.Table<Word>().Where(word => word.WordValue.ToLower().Contains(searchValue.ToLower())).ToList();
+                    List<Word> words = database.Table<Word>().Where(word => word.WordValue.ToLower().Contains(searchValue.ToLower())).ToList();
+
+                    return words;
                 }
             }
         }
@@ -114,25 +127,17 @@ namespace TranslationNTT.Models.DatabaseControllers
                 }
                 else
                 {
-                    Word parentWord = GetByValue(wordValue);
-                    if (parentWord == null)
-                    {
-                        return null;
-                    }
-                    //return database.Table<Word>().Where(word => word.WordId.Equals(parentWord.Id)).ToList();
-                    return new List<Word>();
-                }
-            }
-        }
+                    List<Word> words = database.Table<Word>().Where(word => word.WordValue.ToLower().Contains(wordValue.ToLower())).ToList();
 
-        public void UpdateWithChildren(Word word, Word translation)
-        {
-            lock (locker)
-            {
-                if (word.Id != 0)
-                {
-                    word.Words.Add(translation);
-                    database.UpdateWithChildren(word);
+                    foreach (Word word in words)
+                    {
+                        List<WordTranslate> translates = WordTranslateDatabaseController.Instance.GetAll(word.Id);
+                        if (translates != null)
+                        {
+                            word.Words = GetByTranslates(translates);
+                        }
+                    }
+                    return words;
                 }
             }
         }

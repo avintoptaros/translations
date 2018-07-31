@@ -63,20 +63,19 @@ namespace TranslationNTT.Models
                     WordDatabaseController.Instance.Save(word);
                     LanguageDatabaseController.Instance.UpdateWithChildren(language, word);
                 }
+
+                WordTranslate wordTranslate = new WordTranslate();
+                wordTranslate.WordId = word.Id;
                 // if parent record is not null, then we have a translation
                 if (parentRecord != null)
                 {
                     Word parentWord = WordDatabaseController.Instance.GetByValue(parentRecord.Word);
                     if (parentWord != null)
                     {
-                        WordTranslate wordTranslate = new WordTranslate();
-                        wordTranslate.WordId = word.Id;
                         wordTranslate.ParentWordId = parentWord.Id;
-                        WordTranslateDatabaseController.Instance.Save(wordTranslate);
-
-                        WordDatabaseController.Instance.UpdateWithChildren(parentWord, word);
                     }
                 }
+                WordTranslateDatabaseController.Instance.Save(wordTranslate);
                 return true;
             }
             catch (ArgumentNullException ex)
@@ -92,6 +91,10 @@ namespace TranslationNTT.Models
             catch (SQLite.SQLiteException ex)
             {
                 // we need to treat exception, maybe it's an unique constraint or another exception
+                return false;
+            }
+            catch (Exception ex)
+            {
                 return false;
             }
         }

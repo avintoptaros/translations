@@ -26,14 +26,15 @@ namespace TranslationNTT.ViewModels
             }
         }
 
-        private ObservableCollection<Word> _words = new ObservableCollection<Word>();
-        public ObservableCollection<Word> Words
+        private ObservableCollection<Word> _translatedWords = new ObservableCollection<Word>();
+        public ObservableCollection<Word> TranslatedWords
         {
-            get { return _words; }
+            get { return _translatedWords; }
             set
             {
-                _words = value;
-                OnPropertyChanged("Words");
+                _translatedWords = value;
+                TranslationNotFound = _translatedWords.Count == 0;
+                OnPropertyChanged("TranslatedWords");
             }
         }
 
@@ -55,9 +56,9 @@ namespace TranslationNTT.ViewModels
             set
             {
                 _suggestionField = value;
-                if (_suggestionField != null)
+                if (_suggestionField != null && _suggestionField != string.Empty)
                 {
-                    //MatchedWords = new ObservableCollection<Word>(WordDatabaseController.Instance.GetByMatch(_suggestionField));
+                    MatchedWords = new ObservableCollection<Word>(WordDatabaseController.Instance.GetByMatch(_suggestionField));
                 }
                 
                 OnPropertyChanged("SuggestionField");
@@ -75,11 +76,25 @@ namespace TranslationNTT.ViewModels
             }
         }
 
+        private bool _translationNotFound = false;
+        public bool TranslationNotFound 
+        {
+            get { return _translationNotFound; }
+            set {
+                _translationNotFound = value;
+                OnPropertyChanged("TranslationNotFound");
+            }
+        }
+
         public TranslatorViewModel()
         {
             // check if we have the translations saved into database. If not, save them
             // we need a notification system if the translations file was changed
-            ReadTranslationsFile();
+            if (!WordDatabaseController.Instance.HasRecords())
+            {
+                ReadTranslationsFile();    
+            }
+
         }
 
         public void GetTranslations()
@@ -87,12 +102,18 @@ namespace TranslationNTT.ViewModels
             Word word = WordDatabaseController.Instance.GetByValue(SuggestionField);
             if (word == null)
             {
+                SelectedLanguage = string.Empty;
                 SuggestionFieldColor = Color.Red;
+                TranslationNotFound = false;
+                TranslatedWords.Clear();
                 return;
             }
             SuggestionFieldColor = Color.Green;
             SelectedLanguage = "Selected language: " + LanguageDatabaseController.Instance.GetById(word.LanguageId).Name;
-            Words = new ObservableCollection<Word>(WordDatabaseController.Instance.GetTranslations(SuggestionField));
+            if (word.Words != null)
+            {
+                TranslatedWords = new ObservableCollection<Word>(word.Words);    
+            }
         }
 
         private async void ReadTranslationsFile()

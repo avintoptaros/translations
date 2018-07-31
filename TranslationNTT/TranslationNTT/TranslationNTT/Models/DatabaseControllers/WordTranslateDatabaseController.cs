@@ -35,7 +35,7 @@ namespace TranslationNTT.Models.DatabaseControllers
             _instance.database.CreateTable<WordTranslate>();
         }
 
-        public List<WordTranslate> GetAll(int parentId)
+        public List<WordTranslate> GetAll(int wordId)
         {
             lock (locker)
             {
@@ -45,7 +45,7 @@ namespace TranslationNTT.Models.DatabaseControllers
                 }
                 else
                 {
-                    List<WordTranslate> wordsTranslate = database.Table<WordTranslate>().Where(wt => wt.ParentWordId.Equals(parentId)).ToList();
+                    List<WordTranslate> wordsTranslate = database.Table<WordTranslate>().Where(wt => wt.ParentWordId.Equals(wordId)).ToList();
                     return wordsTranslate;
                 }
             }

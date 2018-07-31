@@ -92,7 +92,6 @@ namespace TranslationNTT.Models.DatabaseControllers
                 else
                 {
                     return database.GetAllWithChildren<Language>(l => l.Culture.Equals(culture)).FirstOrDefault();
-                    //return database.Table<Language>().Where(language => language.Culture.Equals(culture)).FirstOrDefault();
                 }
             }
         }

@@ -1,17 +1,31 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:TranslationNTT"
              xmlns:dm="clr-namespace:dotMorten.Xamarin.Forms;assembly=dotMorten.Xamarin.Forms.AutoSuggestBox"
+             xmlns:extensions="clr-namespace:TranslationNTT.Extensions"
              x:Class="TranslationNTT.Views.MainPage">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <extensions:InverseBoolConverter x:Key="InverseBoolConverter" />
+
+            <Color x:Key="textColor">Black</Color>
+            <Style x:Key="labelTitleStyle" TargetType="Label">
+                <Setter Property="TextColor" Value="{DynamicResource textColor}" />
+                <Setter Property="FontSize" Value="Large"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="HorizontalTextAlignment" Value="Center"/>
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Padding="20, 10">
-        <Label Text="Translator" FontSize="Large" FontAttributes="Bold" HorizontalOptions="FillAndExpand" HorizontalTextAlignment="Center"/>
+        <Label Text="Translator" HorizontalOptions="FillAndExpand" Style="{StaticResource labelTitleStyle}"/>
         <Label Text="{Binding SelectedLanguage}" Margin="0, 20, 0, 0" HorizontalOptions="FillAndExpand"/>
         <dm:AutoSuggestBox PlaceholderText="Search" Text="{Binding SuggestionField, Mode=OneWayToSource}" x:Name="suggestionField"
                 BackgroundColor="{Binding SuggestionFieldColor}"
                 ItemsSource="{Binding MatchedWords}"
                 QuerySubmitted="AutoSuggestBox_QuerySubmitted"/>
-        <ListView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" ItemsSource="{Binding Words}">
+        <ListView VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" ItemsSource="{Binding TranslatedWords}" IsVisible="{Binding TranslationNotFound, Converter={StaticResource InverseBoolConverter}}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <ViewCell>
@@ -22,7 +36,6 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <Label Text="Sorry, no translations found, but the word is in translation list" IsVisible="{Binding TranslationNotFound}" HorizontalOptions="FillAndExpand"/>
     </StackLayout>
-    
-
 </ContentPage>
